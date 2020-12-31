@@ -8,6 +8,7 @@ edition = "2018"
 
 [dependencies]
 actix-web = "3.3.2"
+serde = "1.0.118"
 
 [dev-dependencies]
 actix-rt = "2.0.0-beta.1"
