@@ -14,6 +14,6 @@ COPY src/ src/
 # build release
 RUN cargo build --release
 
-FROM rust:1.48.0
+FROM scratch
 COPY --from=build /usr/src/app/target/release/rust-kata-002 .
 CMD ["./rust-kata-002"]
