@@ -4,6 +4,5 @@ target/
 .editorconfig
 .gitattributes
 .gitignore
-.
 Dockerfile
 README.md
