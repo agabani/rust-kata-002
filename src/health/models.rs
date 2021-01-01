@@ -38,7 +38,7 @@ pub(crate) struct Check {
     #[serde(skip_serializing_if = "Option::is_none", rename = "affectedEndpoints")]
     pub(crate) affected_endpoints: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none", rename = "time")]
-    pub(crate) time: Option<Vec<String>>,
+    pub(crate) time: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", rename = "output")]
     pub(crate) output: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none", rename = "links")]
