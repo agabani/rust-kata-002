@@ -1,25 +1,18 @@
+use crate::health::checkers::uptime_checker;
 use crate::{health::models, health::models::Check};
 use actix_web::{web, HttpResponse};
-use chrono::{SecondsFormat, Utc};
+use chrono::Utc;
 use std::collections::HashMap;
 use std::time::Instant;
 
 pub(crate) async fn get(application_start: web::Data<Instant>) -> HttpResponse {
-    let mut checks = HashMap::<String, Vec<Check>>::new();
-    let uptime = checks.entry("uptime".to_owned()).or_insert(vec![]);
+    let now = Utc::now();
 
-    uptime.push(Check {
-        component_id: None,
-        component_type: Some("system".to_owned()),
-        observed_value: Some(application_start.elapsed().as_secs_f32().to_string()),
-        observed_unit: Some("s".to_owned()),
-        status: Some("pass".to_owned()),
-        affected_endpoints: None,
-        time: Some(Utc::now().to_rfc3339_opts(SecondsFormat::Secs, true)),
-        output: None,
-        links: None,
-        additional_keys: None,
-    });
+    let mut checks = HashMap::<String, Vec<Check>>::new();
+    checks
+        .entry("uptime".to_owned())
+        .or_insert(vec![])
+        .push(uptime_checker(&now, application_start.get_ref()));
 
     HttpResponse::Ok()
         .header("content-type", "application/health+json")

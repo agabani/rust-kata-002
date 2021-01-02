@@ -1,3 +1,4 @@
+mod checkers;
 mod models;
 mod routes;
 
