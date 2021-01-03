@@ -1,9 +1,11 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub(crate) struct QueryParams {
-    pub(crate) name: Option<String>,
-    pub(crate) version: Option<String>,
+    #[serde(rename = "name")]
+    pub(crate) name: String,
+    #[serde(rename = "version")]
+    pub(crate) version: String,
 }
 
 #[derive(Deserialize, Serialize)]

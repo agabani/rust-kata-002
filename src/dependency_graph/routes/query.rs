@@ -1,21 +1,12 @@
 use crate::dependency_graph::models::{Edge, Node, QueryParams, QueryResult};
 use actix_web::{web, HttpResponse};
 
-pub(crate) async fn query(query_parameters: web::Query<QueryParams>) -> HttpResponse {
-    let name = match &query_parameters.name {
-        None => return HttpResponse::BadRequest().finish(),
-        Some(name) => name.to_owned(),
-    };
-    let version = match &query_parameters.version {
-        None => return HttpResponse::BadRequest().finish(),
-        Some(version) => version.to_owned(),
-    };
-
+pub(crate) async fn query(web::Query(query_parameters): web::Query<QueryParams>) -> HttpResponse {
     HttpResponse::Ok().json(QueryResult {
         data: Some(vec![
             Node {
-                name: name.to_owned(),
-                version: version.to_owned(),
+                name: query_parameters.name,
+                version: query_parameters.version,
                 edges: Some(vec![
                     Edge {
                         relationship: "dependency".to_string(),
@@ -59,4 +50,17 @@ pub(crate) async fn query(query_parameters: web::Query<QueryParams>) -> HttpResp
             },
         ]),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::http;
+
+    #[actix_rt::test]
+    async fn test_query_ok() {
+        let response = query(web::Query::from_query("name=name&version=version").unwrap()).await;
+
+        assert_eq!(response.status(), http::StatusCode::OK);
+    }
 }
