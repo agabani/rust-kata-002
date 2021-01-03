@@ -1,4 +1,5 @@
 mod checkers;
+mod envelope;
 mod models;
 mod routes;
 

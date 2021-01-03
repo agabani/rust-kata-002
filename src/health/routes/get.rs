@@ -1,5 +1,5 @@
 use crate::health::checkers::uptime_checker;
-use crate::{health::models, health::models::Check};
+use crate::health::envelope::envelope;
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use std::collections::HashMap;
@@ -8,7 +8,7 @@ use std::time::Instant;
 pub(crate) async fn get(application_start: web::Data<Instant>) -> HttpResponse {
     let now = Utc::now();
 
-    let mut checks = HashMap::<String, Vec<Check>>::new();
+    let mut checks = HashMap::new();
     checks
         .entry("uptime".to_owned())
         .or_insert(vec![])
@@ -16,17 +16,7 @@ pub(crate) async fn get(application_start: web::Data<Instant>) -> HttpResponse {
 
     HttpResponse::Ok()
         .header("content-type", "application/health+json")
-        .json(models::Health {
-            status: "pass".to_owned(),
-            version: Some(env!("CARGO_PKG_VERSION_MAJOR").to_owned()),
-            release_id: Some(env!("CARGO_PKG_VERSION").to_owned()),
-            notes: None,
-            output: None,
-            checks: Some(checks),
-            links: None,
-            service_id: None,
-            description: Some("health of rust-kata-002 service".to_owned()),
-        })
+        .json(envelope(checks))
 }
 
 #[cfg(test)]
