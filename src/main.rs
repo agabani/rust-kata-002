@@ -7,8 +7,12 @@ use std::time::Instant;
 async fn main() -> std::io::Result<()> {
     let application_start = Instant::now();
 
+    std::env::set_var("RUST_LOG", "actix_web=info");
+    env_logger::init();
+
     HttpServer::new(move || {
         App::new()
+            .wrap(middleware::Logger::default())
             .wrap(middleware::NormalizePath::default())
             .data(application_start)
             .service(web::scope("/health").configure(health_routes))
