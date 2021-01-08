@@ -4,5 +4,7 @@ target/
 .editorconfig
 .gitattributes
 .gitignore
+docker-compose.yml
 Dockerfile
+prometheus.yml
 README.md
