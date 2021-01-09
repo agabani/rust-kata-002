@@ -9,8 +9,12 @@ use std::time::Instant;
 async fn main() -> std::io::Result<()> {
     let application_start = Instant::now();
 
-    std::env::set_var("RUST_LOG", "actix_web=info");
+    dotenv::dotenv().ok();
     env_logger::init();
+
+    let host_address = std::env::var("HOST_ADDRESS").unwrap_or("0.0.0.0".to_owned());
+    let host_port = std::env::var("HOST_PORT").unwrap_or("8080".to_owned());
+    let host_socket = format!("{}:{}", host_address, host_port);
 
     HttpServer::new(move || {
         App::new()
@@ -30,7 +34,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::scope("/health").configure(health_routes))
             .service(web::scope("/dependency-graph").configure(dependency_graph_routes))
     })
-    .bind("0.0.0.0:8080")?
+    .bind(host_socket)?
     .run()
     .await
 }

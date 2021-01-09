@@ -1,5 +1,5 @@
 # 1: Build
-FROM rust:1.48.0 as builder
+FROM rust:1.49.0 as builder
 WORKDIR /usr/src
 
 # 1a: Prepare for static linking
@@ -15,7 +15,8 @@ RUN cargo build --release && \
 COPY src/ ./src/
 RUN cargo build --release
 
-# 2: Copy the exe and extra files ("static") to an empty Docker image
+# 2: Copy the exe and extra files to an empty Docker image
 FROM gcr.io/distroless/cc
+COPY .env .
 COPY --from=builder /usr/src/app/target/release/rust-kata-002 .
 CMD ["./rust-kata-002"]
