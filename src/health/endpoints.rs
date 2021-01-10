@@ -1,11 +1,17 @@
 use crate::health::checkers::uptime_checker;
-use crate::health::envelope::envelope;
+use crate::health::models::Health;
 use actix_web::{web, HttpResponse};
 use chrono::Utc;
 use std::collections::HashMap;
 use std::time::Instant;
 
-pub(crate) async fn get(application_start: web::Data<Instant>) -> HttpResponse {
+pub fn config(cfg: &mut web::ServiceConfig) {
+    cfg.route("/", web::get().to(get))
+        .route("/liveliness/", web::get().to(probe))
+        .route("/readiness/", web::get().to(probe));
+}
+
+async fn get(application_start: web::Data<Instant>) -> HttpResponse {
     let now = Utc::now();
 
     let mut checks = HashMap::new();
@@ -16,7 +22,11 @@ pub(crate) async fn get(application_start: web::Data<Instant>) -> HttpResponse {
 
     HttpResponse::Ok()
         .header("content-type", "application/health+json")
-        .json(envelope(checks))
+        .json(Health::envelope(checks))
+}
+
+async fn probe() -> HttpResponse {
+    HttpResponse::Ok().finish()
 }
 
 #[cfg(test)]
@@ -37,5 +47,12 @@ mod tests {
             .to_str()
             .expect("expected header to only contain visible ASCII");
         assert_eq!(content_type_header, "application/health+json");
+    }
+
+    #[actix_rt::test]
+    async fn probe_ok() {
+        let response = probe().await;
+
+        assert_eq!(response.status(), http::StatusCode::OK);
     }
 }
