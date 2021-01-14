@@ -1,3 +1,4 @@
+mod get_crate;
 mod get_crate_dependencies;
 
 use crate::errors::{RustKataError, RustKataResult};
