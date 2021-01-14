@@ -1,14 +1,23 @@
 use crate::crates_io::CratesIoClient;
 use crate::errors::{RustKataError, RustKataResult};
+use crate::observability::metrics;
 use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::time::Instant;
 
 impl CratesIoClient {
     pub async fn get_crate(&self, crate_name: &str) -> RustKataResult<Response> {
         let url = format!("{}/api/v1/crates/{}", self.base_url, crate_name);
 
+        let instant = Instant::now();
+
         let response = self.client.get(&url).send().await.unwrap();
+
+        let duration = instant.elapsed();
+
+        metrics::api_request_duration_seconds(&self.base_url, "get_crates", &response.status())
+            .observe(duration.as_secs_f64());
 
         if response.status() != StatusCode::OK {
             return Err(RustKataError {});

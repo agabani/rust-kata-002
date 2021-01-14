@@ -1,36 +1,61 @@
 use actix_web::http::StatusCode;
 use prometheus::{Histogram, HistogramVec, IntCounterVec};
 
+const BASE_URL: &str = "base_url";
 const ENDPOINT: &str = "endpoint";
 const STATUS_CODE: &str = "status_code";
 
-lazy_static! {
-    static ref HTTP_REQUSET_COUNTER: IntCounterVec =
-        register_int_counter_vec!("http_request_count", "http request count", &[ENDPOINT]).unwrap();
-    static ref HTTP_RESPONSE_COUNTER: IntCounterVec = register_int_counter_vec!(
-        "http_response_count",
-        "http response count",
-        &[ENDPOINT, STATUS_CODE]
-    )
-    .unwrap();
-    static ref HTTPS_RESPONSE_DURATION: HistogramVec = register_histogram_vec!(
-        "http_response_duration",
-        "http response duration",
-        &[ENDPOINT, STATUS_CODE]
-    )
-    .unwrap();
+pub fn api_request_duration_seconds(
+    base_url: &str,
+    endpoint: &str,
+    status_code: &StatusCode,
+) -> Histogram {
+    lazy_static! {
+        static ref METRIC: HistogramVec = register_histogram_vec!(
+            "api_request_duration_seconds",
+            "api request duration seconds",
+            &[BASE_URL, ENDPOINT, STATUS_CODE]
+        )
+        .unwrap();
+    }
+
+    METRIC.with_label_values(&[base_url, endpoint, status_code.as_str()])
 }
 
-pub fn http_request_counter(endpoint: &str) {
-    HTTP_REQUSET_COUNTER.with_label_values(&[endpoint]).inc()
+pub fn http_request_count(endpoint: &str) {
+    lazy_static! {
+        static ref METRIC: IntCounterVec =
+            register_int_counter_vec!("http_request_count", "http request count", &[ENDPOINT])
+                .unwrap();
+    }
+
+    METRIC.with_label_values(&[endpoint]).inc()
 }
 
 pub fn http_response_count(endpoint: &str, status_code: &StatusCode) {
-    HTTP_RESPONSE_COUNTER
+    lazy_static! {
+        static ref METRIC: IntCounterVec = register_int_counter_vec!(
+            "http_response_count",
+            "http response count",
+            &[ENDPOINT, STATUS_CODE]
+        )
+        .unwrap();
+    }
+
+    METRIC
         .with_label_values(&[endpoint, status_code.as_str()])
         .inc()
 }
 
-pub fn http_response_duration(endpoint: &str, status_code: &StatusCode) -> Histogram {
-    HTTPS_RESPONSE_DURATION.with_label_values(&[endpoint, status_code.as_str()])
+pub fn http_response_duration_seconds(endpoint: &str, status_code: &StatusCode) -> Histogram {
+    lazy_static! {
+        static ref METRIC: HistogramVec = register_histogram_vec!(
+            "http_response_duration_seconds",
+            "http response duration seconds",
+            &[ENDPOINT, STATUS_CODE]
+        )
+        .unwrap();
+    }
+
+    METRIC.with_label_values(&[endpoint, status_code.as_str()])
 }
