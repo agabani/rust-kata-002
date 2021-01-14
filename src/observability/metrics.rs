@@ -16,7 +16,7 @@ lazy_static! {
     static ref HTTPS_RESPONSE_DURATION: HistogramVec = register_histogram_vec!(
         "http_response_duration",
         "http response duration",
-        &[ENDPOINT]
+        &[ENDPOINT, STATUS_CODE]
     )
     .unwrap();
 }
@@ -31,6 +31,6 @@ pub fn http_response_count(endpoint: &str, status_code: &StatusCode) {
         .inc()
 }
 
-pub fn http_response_duration(endpoint: &str) -> Histogram {
-    HTTPS_RESPONSE_DURATION.with_label_values(&[endpoint])
+pub fn http_response_duration(endpoint: &str, status_code: &StatusCode) -> Histogram {
+    HTTPS_RESPONSE_DURATION.with_label_values(&[endpoint, status_code.as_str()])
 }

@@ -6,6 +6,7 @@ use std::collections::HashSet;
 use std::future::{Future, Ready};
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use std::time::Instant;
 
 #[derive(Clone)]
 pub struct ObservabilityMetrics {
@@ -89,16 +90,18 @@ where
         if self.options.exclude.contains(&path) || self.options.exclude_regex.is_match(&path) {
             Box::pin(self.service.call(request))
         } else {
+            let request_start = Instant::now();
+
             metrics::http_request_counter(&path);
-            let histogram = metrics::http_response_duration(&path).start_timer();
 
             let future = self.service.call(request);
 
             Box::pin(async move {
                 let response = future.await? as ServiceResponse<B>;
 
-                histogram.observe_duration();
                 metrics::http_response_count(&path, &response.status());
+                metrics::http_response_duration(&path, &response.status())
+                    .observe(request_start.elapsed().as_secs_f64());
 
                 Ok(response)
             })
