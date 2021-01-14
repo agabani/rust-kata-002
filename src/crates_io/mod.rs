@@ -21,7 +21,7 @@ impl CratesIoClient {
         let client = reqwest::Client::builder()
             .default_headers(headers)
             .build()
-            .map_err(|_| RustKataError {})?;
+            .unwrap();
 
         Ok(CratesIoClient {
             base_url: base_url.to_owned(),
