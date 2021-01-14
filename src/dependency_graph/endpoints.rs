@@ -5,8 +5,7 @@ use actix_web::web::QueryConfig;
 use actix_web::{error, web, HttpRequest, HttpResponse};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.app_data(query_config())
-        .route("/", web::get().to(query));
+    cfg.app_data(query_config()).route("", web::get().to(query));
 }
 
 fn query_config() -> QueryConfig {

@@ -6,9 +6,9 @@ use std::collections::HashMap;
 use std::time::Instant;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.route("/", web::get().to(get))
-        .route("/liveliness/", web::get().to(probe))
-        .route("/readiness/", web::get().to(probe));
+    cfg.route("", web::get().to(get))
+        .route("/liveliness", web::get().to(probe))
+        .route("/readiness", web::get().to(probe));
 }
 
 async fn get(application_start: web::Data<Instant>) -> HttpResponse {

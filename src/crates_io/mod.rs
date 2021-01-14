@@ -1,9 +1,9 @@
 mod get_crate;
 mod get_crate_dependencies;
 
-use crate::errors::{RustKataError, RustKataResult};
+use crate::errors::RustKataResult;
 
-struct CratesIoClient {
+pub struct CratesIoClient {
     base_url: String,
     client: reqwest::Client,
 }

@@ -6,6 +6,7 @@ use std::collections::HashSet;
 use std::future::{Future, Ready};
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use std::time::Instant;
 
 #[derive(Clone)]
 pub struct ObservabilityMetrics {
@@ -43,13 +44,12 @@ impl Default for ObservabilityMetrics {
     }
 }
 
-impl<S, B> Transform<S> for ObservabilityMetrics
+impl<S, B> Transform<S, ServiceRequest> for ObservabilityMetrics
 where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
     S::Future: 'static,
     B: 'static,
 {
-    type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = Error;
     type Transform = ObservabilityMetricsMiddleware<S>;
@@ -69,13 +69,12 @@ pub struct ObservabilityMetricsMiddleware<S> {
     service: S,
 }
 
-impl<S, B> Service for ObservabilityMetricsMiddleware<S>
+impl<S, B> Service<ServiceRequest> for ObservabilityMetricsMiddleware<S>
 where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
     S::Future: 'static,
     B: 'static,
 {
-    type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = Error;
     #[allow(clippy::type_complexity)]
@@ -91,16 +90,18 @@ where
         if self.options.exclude.contains(&path) || self.options.exclude_regex.is_match(&path) {
             Box::pin(self.service.call(request))
         } else {
+            let request_start = Instant::now();
+
             metrics::http_request_counter(&path);
-            let histogram = metrics::http_response_duration(&path).start_timer();
 
             let future = self.service.call(request);
 
             Box::pin(async move {
                 let response = future.await? as ServiceResponse<B>;
 
-                histogram.observe_duration();
                 metrics::http_response_count(&path, &response.status());
+                metrics::http_response_duration(&path, &response.status())
+                    .observe(request_start.elapsed().as_secs_f64());
 
                 Ok(response)
             })
