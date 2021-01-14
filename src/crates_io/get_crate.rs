@@ -205,7 +205,70 @@ mod tests {
 
         let response = client.get_crate("rand").await.unwrap();
 
-        ()
+        assert_eq!(response.crate_.id, "rand");
+        assert_eq!(response.crate_.name, "rand");
+        assert_eq!(
+            response.crate_.updated_at,
+            "2021-01-13T09:55:20.922296+00:00"
+        );
+        assert_eq!(response.crate_.versions.len(), 65);
+        assert_eq!(response.crate_.versions[0], 326822);
+        assert_eq!(response.crate_.versions[64], 4362);
+        assert_eq!(response.crate_.keywords, vec!["random", "rng"]);
+        assert_eq!(
+            response.crate_.links.version_downloads,
+            "/api/v1/crates/rand/downloads"
+        );
+        assert_eq!(response.crate_.links.versions, None);
+        assert_eq!(response.crate_.exact_match, false);
+
+        assert_eq!(response.versions.len(), 65);
+        assert_eq!(response.versions[0].id, 326822);
+        assert_eq!(response.versions[0].crate_, "rand");
+        assert_eq!(response.versions[64].id, 4362);
+        assert_eq!(response.versions[64].yanked, false);
+
+        assert_eq!(response.keywords.len(), 2);
+        assert_eq!(response.keywords[0].id, "random");
+        assert_eq!(response.keywords[0].keyword, "random");
+        assert_eq!(
+            response.keywords[0].created_at,
+            "2014-11-21T00:22:50.038243+00:00"
+        );
+        assert_eq!(response.keywords[0].crates_cnt, 171);
+        assert_eq!(response.keywords[1].id, "rng");
+        assert_eq!(response.keywords[1].keyword, "rng");
+        assert_eq!(
+            response.keywords[1].created_at,
+            "2015-02-02T03:37:04.452064+00:00"
+        );
+        assert_eq!(response.keywords[1].crates_cnt, 58);
+
+        assert_eq!(response.categories.len(), 2);
+        assert_eq!(response.categories[0].id, "no-std");
+        assert_eq!(response.categories[0].category, "No standard library");
+        assert_eq!(response.categories[0].slug, "no-std");
+        assert_eq!(
+            response.categories[0].description,
+            "Crates that are able to function without the Rust standard library.\n"
+        );
+        assert_eq!(
+            response.categories[0].created_at,
+            "2017-02-10T01:52:09.447906+00:00"
+        );
+        assert_eq!(response.categories[0].crates_cnt, 2300);
+
+        assert_eq!(response.categories[1].id, "algorithms");
+        assert_eq!(response.categories[1].category, "Algorithms");
+        assert_eq!(response.categories[1].slug, "algorithms");
+        assert_eq!(response.categories[1].description,  "Rust implementations of core algorithms such as hashing, sorting, searching, and more.");
+        assert_eq!(
+            response.categories[1].created_at,
+            "2017-01-17T19:13:05.112025+00:00"
+        );
+        assert_eq!(response.categories[1].crates_cnt, 999);
+
+        mock.assert();
     }
 
     const RESPONSE: &str = r#"
