@@ -4,7 +4,7 @@ use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 
 impl CratesIoClient {
-    pub async fn get_dependencies(
+    pub async fn get_crate_dependencies(
         &self,
         crate_name: &str,
         crate_version: &str,
@@ -62,7 +62,7 @@ mod tests {
     use mockito::mock;
 
     #[actix_rt::test]
-    async fn get_dependencies() {
+    async fn test() {
         let mock = mock("GET", "/api/v1/crates/rand/0.8.2/dependencies")
             .with_status(200)
             .with_body(
@@ -205,7 +205,10 @@ mod tests {
             .create();
 
         let client = CratesIoClient::new(&mockito::server_url()).unwrap();
-        let response = client.get_dependencies(&"rand", &"0.8.2").await.unwrap();
+        let response = client
+            .get_crate_dependencies(&"rand", &"0.8.2")
+            .await
+            .unwrap();
 
         assert_eq!(response.dependencies.len(), 10usize);
 
