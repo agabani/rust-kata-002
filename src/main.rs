@@ -1,5 +1,7 @@
 use actix_web::{middleware, web, App, HttpServer};
-use rust_kata_002::{dependency_graph, health, observability};
+use rust_kata_002::crates_io::CratesIoClient;
+use rust_kata_002::{dependency_graph, health, observability, proxy};
+use std::env;
 use std::time::Instant;
 
 #[actix_web::main]
@@ -9,8 +11,11 @@ async fn main() -> std::io::Result<()> {
     dotenv::dotenv().ok();
     env_logger::init();
 
-    let host_address = std::env::var("HOST_ADDRESS").unwrap_or_else(|_| "0.0.0.0".to_owned());
-    let host_port = std::env::var("HOST_PORT").unwrap_or_else(|_| "8080".to_owned());
+    let crate_registry =
+        env::var("CRATE_REGISTRY_BASE_URL").unwrap_or_else(|_| "https://crates.io".to_owned());
+
+    let host_address = env::var("HOST_ADDRESS").unwrap_or_else(|_| "0.0.0.0".to_owned());
+    let host_port = env::var("HOST_PORT").unwrap_or_else(|_| "8080".to_owned());
     let host_socket = format!("{}:{}", host_address, host_port);
 
     const METRICS_EXCLUDE: &str = "/metrics";
@@ -30,9 +35,11 @@ async fn main() -> std::io::Result<()> {
             )
             .wrap(middleware::NormalizePath::default())
             .data(application_start)
+            .data(CratesIoClient::new(&crate_registry).unwrap())
             .service(web::scope("/metrics").configure(observability::endpoints::config))
             .service(web::scope("/health").configure(health::endpoints::config))
             .service(web::scope("/dependency-graph").configure(dependency_graph::endpoints::config))
+            .service(web::scope("/proxy").configure(proxy::endpoints::config))
     })
     .bind(host_socket)?
     .run()
