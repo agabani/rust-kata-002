@@ -43,13 +43,12 @@ impl Default for ObservabilityMetrics {
     }
 }
 
-impl<S, B> Transform<S> for ObservabilityMetrics
+impl<S, B> Transform<S, ServiceRequest> for ObservabilityMetrics
 where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
     S::Future: 'static,
     B: 'static,
 {
-    type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = Error;
     type Transform = ObservabilityMetricsMiddleware<S>;
@@ -69,13 +68,12 @@ pub struct ObservabilityMetricsMiddleware<S> {
     service: S,
 }
 
-impl<S, B> Service for ObservabilityMetricsMiddleware<S>
+impl<S, B> Service<ServiceRequest> for ObservabilityMetricsMiddleware<S>
 where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
     S::Future: 'static,
     B: 'static,
 {
-    type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = Error;
     #[allow(clippy::type_complexity)]

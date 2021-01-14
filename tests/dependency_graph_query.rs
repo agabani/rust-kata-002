@@ -12,7 +12,7 @@ mod tests {
         .await;
 
         let request = test::TestRequest::get()
-            .uri("/dependency-graph/?version=version")
+            .uri("/dependency-graph?version=version")
             .to_request();
 
         let response = test::call_service(&mut app, request).await;
@@ -33,7 +33,7 @@ mod tests {
         .await;
 
         let request = test::TestRequest::get()
-            .uri("/dependency-graph/?name=name")
+            .uri("/dependency-graph?name=name")
             .to_request();
 
         let response = test::call_service(&mut app, request).await;

@@ -2,7 +2,7 @@ use actix_web::{web, HttpResponse};
 use prometheus::{Encoder, TextEncoder};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.route("/", web::get().to(get));
+    cfg.route("", web::get().to(get));
 }
 
 async fn get() -> HttpResponse {

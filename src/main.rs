@@ -13,17 +13,20 @@ async fn main() -> std::io::Result<()> {
     let host_port = std::env::var("HOST_PORT").unwrap_or_else(|_| "8080".to_owned());
     let host_socket = format!("{}:{}", host_address, host_port);
 
+    const METRICS_EXCLUDE: &str = "/metrics";
+    const HEALTH_EXCLUDE_REGEX: &str = "^/health(?:/.*)?$";
+
     HttpServer::new(move || {
         App::new()
             .wrap(
                 observability::middleware::ObservabilityMetrics::default()
-                    .exclude("/metrics/")
-                    .exclude_regex("/health/.*"),
+                    .exclude(METRICS_EXCLUDE)
+                    .exclude_regex(HEALTH_EXCLUDE_REGEX),
             )
             .wrap(
                 middleware::Logger::default()
-                    .exclude("/metrics/")
-                    .exclude_regex("/health/.*"),
+                    .exclude(METRICS_EXCLUDE)
+                    .exclude_regex(HEALTH_EXCLUDE_REGEX),
             )
             .wrap(middleware::NormalizePath::default())
             .data(application_start)

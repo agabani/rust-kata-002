@@ -11,7 +11,7 @@ mod tests {
         .await;
 
         let request = test::TestRequest::get()
-            .uri("/health/liveliness/")
+            .uri("/health/liveliness")
             .to_request();
 
         let response = test::call_service(&mut app, request).await;
