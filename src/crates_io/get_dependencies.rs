@@ -1,33 +1,9 @@
+use crate::crates_io::CratesIoClient;
 use crate::errors::{RustKataError, RustKataResult};
-use actix_web::http::StatusCode;
+use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
 
-struct CratesIoClient {
-    base_url: String,
-    client: reqwest::Client,
-}
-
 impl CratesIoClient {
-    pub fn new(base_url: &str) -> RustKataResult<Self> {
-        let mut headers = reqwest::header::HeaderMap::new();
-        headers.insert(
-            reqwest::header::USER_AGENT,
-            reqwest::header::HeaderValue::from_static(
-                "rust-kata-002 (https://github.com/agabani/rust-kata-002)",
-            ),
-        );
-
-        let client = reqwest::Client::builder()
-            .default_headers(headers)
-            .build()
-            .map_err(|_| RustKataError {})?;
-
-        Ok(CratesIoClient {
-            base_url: base_url.to_owned(),
-            client,
-        })
-    }
-
     pub async fn get_dependencies(
         &self,
         crate_name: &str,
@@ -44,23 +20,20 @@ impl CratesIoClient {
             return Err(RustKataError {});
         }
 
-        let json = response
-            .json::<CrateDependenciesResponse>()
-            .await
-            .map_err(|_| RustKataError {})?;
+        let json = response.json::<CrateDependenciesResponse>().await.unwrap();
 
         Ok(json)
     }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct CrateDependenciesResponse {
+pub struct CrateDependenciesResponse {
     #[serde(rename = "dependencies")]
     dependencies: Vec<CrateDependencyResponse>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-struct CrateDependencyResponse {
+pub struct CrateDependencyResponse {
     #[serde(rename = "id")]
     id: i32,
     #[serde(rename = "version_id")]
