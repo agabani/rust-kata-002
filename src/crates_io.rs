@@ -30,15 +30,13 @@ impl CratesIoClient {
             client,
         })
     }
-}
 
-#[async_trait]
-impl CrateRegistry for CratesIoClient {
-    async fn get_crate(
+    async fn get<T: for<'de> serde::Deserialize<'de>>(
         &self,
-        crate_name: &str,
-    ) -> RustKataResult<crate::traits::get_crate::Response> {
-        let url = format!("{}/api/v1/crates/{}", self.base_url, crate_name);
+        path: &str,
+        endpoint: &str,
+    ) -> RustKataResult<T> {
+        let url = format!("{}{}", self.base_url, path);
 
         let instant = Instant::now();
 
@@ -46,7 +44,7 @@ impl CrateRegistry for CratesIoClient {
 
         let duration = instant.elapsed();
 
-        metrics::api_request_duration_seconds(&self.base_url, "get_crates", &response.status())
+        metrics::api_request_duration_seconds(&self.base_url, endpoint, &response.status())
             .observe(duration.as_secs_f64());
 
         if response.status() != StatusCode::OK {
@@ -57,37 +55,30 @@ impl CrateRegistry for CratesIoClient {
 
         Ok(response)
     }
+}
+
+#[async_trait]
+impl CrateRegistry for CratesIoClient {
+    async fn get_crate(
+        &self,
+        crate_name: &str,
+    ) -> RustKataResult<crate::traits::get_crate::Response> {
+        let path = format!("/api/v1/crates/{}", crate_name);
+
+        self.get(&path, "get_crate").await
+    }
 
     async fn get_crate_dependencies(
         &self,
         crate_name: &str,
         crate_version: &str,
     ) -> RustKataResult<crate::traits::get_crate_dependencies::Response> {
-        let url = format!(
-            "{}/api/v1/crates/{}/{}/dependencies",
-            self.base_url, crate_name, crate_version
+        let path = format!(
+            "/api/v1/crates/{}/{}/dependencies",
+            crate_name, crate_version
         );
 
-        let instant = Instant::now();
-
-        let response = self.client.get(&url).send().await.unwrap();
-
-        let duration = instant.elapsed();
-
-        metrics::api_request_duration_seconds(
-            &self.base_url,
-            "get_crate_dependencies",
-            &response.status(),
-        )
-        .observe(duration.as_secs_f64());
-
-        if response.status() != StatusCode::OK {
-            return Err(RustKataError {});
-        }
-
-        let response = response.json().await.unwrap();
-
-        Ok(response)
+        self.get(&path, "get_crate_dependencies").await
     }
 }
 
