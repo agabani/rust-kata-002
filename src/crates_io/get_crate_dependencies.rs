@@ -76,21 +76,7 @@ mod tests {
 
     #[actix_rt::test]
     async fn test() {
-        let mock = mock("GET", "/api/v1/crates/rand/0.8.2/dependencies")
-            .with_status(200)
-            .with_header("content-type", "application/json; charset=utf-8")
-            .with_body(RESPONSE)
-            .match_header(
-                "user-agent",
-                "rust-kata-002 (https://github.com/agabani/rust-kata-002)",
-            )
-            .create();
-
-        let client = CratesIoClient::new(&mockito::server_url()).unwrap();
-        let response = client
-            .get_crate_dependencies(&"rand", &"0.8.2")
-            .await
-            .unwrap();
+        let response = theory("rand", "0.8.2", "get_crate_dependencies_rand_0.8.2.json").await;
 
         assert_eq!(response.dependencies.len(), 10usize);
 
@@ -121,138 +107,34 @@ mod tests {
         assert_eq!(response.dependencies[9].target, None);
         assert_eq!(response.dependencies[9].kind, "normal");
         assert_eq!(response.dependencies[9].downloads, 0);
-
-        mock.assert();
     }
 
-    const RESPONSE: &str = r#"
-{
-    "dependencies": [
-        {
-            "id": 2012432,
-            "version_id": 326822,
-            "crate_id": "bincode",
-            "req": "^1.2.1",
-            "optional": false,
-            "default_features": true,
-            "features": [],
-            "target": null,
-            "kind": "dev",
-            "downloads": 0
-        },
-        {
-            "id": 2012430,
-            "version_id": 326822,
-            "crate_id": "rand_core",
-            "req": "^0.6.0",
-            "optional": false,
-            "default_features": true,
-            "features": [],
-            "target": null,
-            "kind": "normal",
-            "downloads": 0
-        },
-        {
-            "id": 2012433,
-            "version_id": 326822,
-            "crate_id": "rand_hc",
-            "req": "^0.3.0",
-            "optional": false,
-            "default_features": true,
-            "features": [],
-            "target": null,
-            "kind": "dev",
-            "downloads": 0
-        },
-        {
-            "id": 2012434,
-            "version_id": 326822,
-            "crate_id": "rand_pcg",
-            "req": "^0.3.0",
-            "optional": false,
-            "default_features": true,
-            "features": [],
-            "target": null,
-            "kind": "dev",
-            "downloads": 0
-        },
-        {
-            "id": 2012437,
-            "version_id": 326822,
-            "crate_id": "libc",
-            "req": "^0.2.22",
-            "optional": true,
-            "default_features": false,
-            "features": [],
-            "target": "cfg(unix)",
-            "kind": "normal",
-            "downloads": 0
-        },
-        {
-            "id": 2012428,
-            "version_id": 326822,
-            "crate_id": "log",
-            "req": "^0.4.4",
-            "optional": true,
-            "default_features": true,
-            "features": [],
-            "target": null,
-            "kind": "normal",
-            "downloads": 0
-        },
-        {
-            "id": 2012429,
-            "version_id": 326822,
-            "crate_id": "packed_simd_2",
-            "req": "^0.3.4",
-            "optional": true,
-            "default_features": true,
-            "features": [
-                "into_bits"
-            ],
-            "target": null,
-            "kind": "normal",
-            "downloads": 0
-        },
-        {
-            "id": 2012435,
-            "version_id": 326822,
-            "crate_id": "rand_chacha",
-            "req": "^0.3.0",
-            "optional": true,
-            "default_features": false,
-            "features": [],
-            "target": "cfg(not(target_os = \"emscripten\"))",
-            "kind": "normal",
-            "downloads": 0
-        },
-        {
-            "id": 2012436,
-            "version_id": 326822,
-            "crate_id": "rand_hc",
-            "req": "^0.3.0",
-            "optional": true,
-            "default_features": true,
-            "features": [],
-            "target": "cfg(target_os = \"emscripten\")",
-            "kind": "normal",
-            "downloads": 0
-        },
-        {
-            "id": 2012431,
-            "version_id": 326822,
-            "crate_id": "serde",
-            "req": "^1.0.103",
-            "optional": true,
-            "default_features": true,
-            "features": [
-                "derive"
-            ],
-            "target": null,
-            "kind": "normal",
-            "downloads": 0
-        }
-    ]
-}
-    "#;
+    async fn theory(crate_name: &str, crate_version: &str, test_fixture_file: &str) -> Response {
+        let path = format!(
+            "/api/v1/crates/{}/{}/dependencies",
+            crate_name, crate_version
+        );
+
+        let mock = mock("GET", path.as_str())
+            .with_status(200)
+            .with_header("content-type", "application/json; charset=utf-8")
+            .with_body(
+                std::fs::read_to_string(format!("./tests/fixtures/{}", test_fixture_file)).unwrap(),
+            )
+            .match_header(
+                "user-agent",
+                "rust-kata-002 (https://github.com/agabani/rust-kata-002)",
+            )
+            .create();
+
+        let client = CratesIoClient::new(&mockito::server_url()).unwrap();
+        let response = client
+            .get_crate_dependencies(&"rand", &"0.8.2")
+            .await
+            .unwrap();
+
+        mock.assert();
+
+        response
+    }
 }
