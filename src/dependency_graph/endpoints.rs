@@ -1,5 +1,6 @@
 use crate::dependency_graph::models::{Edge, Node, QueryParams, QueryResult};
 use crate::models::ErrorResponse;
+use crate::traits::CrateRegistry;
 use actix_web::error::QueryPayloadError;
 use actix_web::web::QueryConfig;
 use actix_web::{error, web, HttpRequest, HttpResponse};
@@ -25,66 +26,33 @@ fn query_config() -> QueryConfig {
     })
 }
 
-async fn query(web::Query(query_parameters): web::Query<QueryParams>) -> HttpResponse {
+async fn query(
+    web::Query(query_parameters): web::Query<QueryParams>,
+    crates_io_client: web::Data<Box<dyn CrateRegistry>>,
+) -> HttpResponse {
+    let result = crates_io_client
+        .get_crate_dependencies(&query_parameters.name, &query_parameters.version)
+        .await
+        .unwrap();
+
+    let edges = result
+        .dependencies
+        .iter()
+        .map(|dependency| Edge {
+            relationship: dependency.kind.to_owned(),
+            node: Node {
+                name: dependency.crate_id.to_owned(),
+                version: dependency.req.to_owned(),
+                edges: None,
+            },
+        })
+        .collect();
+
     HttpResponse::Ok().json(QueryResult {
-        data: Some(vec![
-            Node {
-                name: query_parameters.name,
-                version: query_parameters.version,
-                edges: Some(vec![
-                    Edge {
-                        relationship: "dependency".to_string(),
-                        node: Node {
-                            name: "name".to_string(),
-                            version: "version".to_string(),
-                            edges: None,
-                        },
-                    },
-                    Edge {
-                        relationship: "dev-dependency".to_string(),
-                        node: Node {
-                            name: "name".to_string(),
-                            version: "version".to_string(),
-                            edges: None,
-                        },
-                    },
-                ]),
-            },
-            Node {
-                name: "name".to_owned(),
-                version: "version".to_owned(),
-                edges: Some(vec![
-                    Edge {
-                        relationship: "dependency".to_string(),
-                        node: Node {
-                            name: "name".to_string(),
-                            version: "version".to_string(),
-                            edges: None,
-                        },
-                    },
-                    Edge {
-                        relationship: "dev-dependency".to_string(),
-                        node: Node {
-                            name: "name".to_string(),
-                            version: "version".to_string(),
-                            edges: None,
-                        },
-                    },
-                ]),
-            },
-        ]),
+        data: Some(vec![Node {
+            name: query_parameters.name.to_owned(),
+            version: query_parameters.version.to_owned(),
+            edges: Some(edges),
+        }]),
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use actix_web::http;
-
-    #[actix_rt::test]
-    async fn test_query_ok() {
-        let response = query(web::Query::from_query("name=name&version=version").unwrap()).await;
-
-        assert_eq!(response.status(), http::StatusCode::OK);
-    }
 }

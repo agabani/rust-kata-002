@@ -1,33 +1,33 @@
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize)]
-pub(crate) struct QueryParams {
+pub struct QueryParams {
     #[serde(rename = "name")]
-    pub(crate) name: String,
+    pub name: String,
     #[serde(rename = "version")]
-    pub(crate) version: String,
+    pub version: String,
 }
 
-#[derive(Deserialize, Serialize)]
-pub(crate) struct QueryResult {
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub struct QueryResult {
     #[serde(skip_serializing_if = "Option::is_none", rename = "data")]
-    pub(crate) data: Option<Vec<Node>>,
+    pub data: Option<Vec<Node>>,
 }
 
-#[derive(Deserialize, Serialize)]
-pub(crate) struct Node {
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub struct Node {
     #[serde(rename = "name")]
-    pub(crate) name: String,
+    pub name: String,
     #[serde(rename = "version")]
-    pub(crate) version: String,
+    pub version: String,
     #[serde(skip_serializing_if = "Option::is_none", rename = "edges")]
-    pub(crate) edges: Option<Vec<Edge>>,
+    pub edges: Option<Vec<Edge>>,
 }
 
-#[derive(Deserialize, Serialize)]
-pub(crate) struct Edge {
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
+pub struct Edge {
     #[serde(rename = "relationship")]
-    pub(crate) relationship: String,
+    pub relationship: String,
     #[serde(rename = "node")]
-    pub(crate) node: Node,
+    pub node: Node,
 }

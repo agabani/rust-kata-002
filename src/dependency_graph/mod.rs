@@ -1,2 +1,2 @@
 pub mod endpoints;
-mod models;
+pub mod models;
