@@ -92,7 +92,7 @@ where
         } else {
             let request_start = Instant::now();
 
-            metrics::http_request_counter(&path);
+            metrics::http_request_count(&path);
 
             let future = self.service.call(request);
 
@@ -100,7 +100,7 @@ where
                 let response = future.await? as ServiceResponse<B>;
 
                 metrics::http_response_count(&path, &response.status());
-                metrics::http_response_duration(&path, &response.status())
+                metrics::http_response_duration_seconds(&path, &response.status())
                     .observe(request_start.elapsed().as_secs_f64());
 
                 Ok(response)
