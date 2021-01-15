@@ -1,5 +1,6 @@
 use actix_web::{middleware, web, App, HttpServer};
 use rust_kata_002::crates_io::CratesIoClient;
+use rust_kata_002::traits::CrateRegistry;
 use rust_kata_002::{dependency_graph, health, observability, proxy};
 use std::env;
 use std::time::Instant;
@@ -35,7 +36,7 @@ async fn main() -> std::io::Result<()> {
             )
             .wrap(middleware::NormalizePath::default())
             .data(application_start)
-            .data(CratesIoClient::new(&crate_registry).unwrap())
+            .data::<Box<dyn CrateRegistry>>(Box::new(CratesIoClient::new(&crate_registry).unwrap()))
             .service(web::scope("/metrics").configure(observability::endpoints::config))
             .service(web::scope("/health").configure(health::endpoints::config))
             .service(web::scope("/dependency-graph").configure(dependency_graph::endpoints::config))

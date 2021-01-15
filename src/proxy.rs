@@ -1,6 +1,6 @@
 pub mod endpoints {
-    use crate::crates_io::CratesIoClient;
     use crate::models::ErrorResponse;
+    use crate::traits::CrateRegistry;
     use actix_web::error::QueryPayloadError;
     use actix_web::web::QueryConfig;
     use actix_web::{error, web, HttpRequest, HttpResponse};
@@ -31,7 +31,7 @@ pub mod endpoints {
 
     async fn get_crate(
         web::Query(query_parameters): web::Query<GetCrateQueryParams>,
-        crates_io_client: web::Data<CratesIoClient>,
+        crates_io_client: web::Data<Box<dyn CrateRegistry>>,
     ) -> HttpResponse {
         let response = crates_io_client
             .get_crate(&query_parameters.name)
@@ -42,7 +42,7 @@ pub mod endpoints {
 
     async fn get_crate_dependency(
         web::Query(query_parameters): web::Query<GetCrateDependenciesQueryParams>,
-        crates_io_client: web::Data<CratesIoClient>,
+        crates_io_client: web::Data<Box<dyn CrateRegistry>>,
     ) -> HttpResponse {
         let response = crates_io_client
             .get_crate_dependencies(&query_parameters.name, &query_parameters.version)

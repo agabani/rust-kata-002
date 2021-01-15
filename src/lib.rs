@@ -10,3 +10,4 @@ pub mod health;
 pub mod models;
 pub mod observability;
 pub mod proxy;
+pub mod traits;
