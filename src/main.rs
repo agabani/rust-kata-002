@@ -1,6 +1,6 @@
 use actix_web::{middleware, web, App, HttpServer};
 use rust_kata_002::crates_io::CratesIoClient;
-use rust_kata_002::traits::CrateRegistry;
+use rust_kata_002::interfaces::CrateRegistry;
 use rust_kata_002::{dependency_graph, health, observability, proxy};
 use std::env;
 use std::time::Instant;

@@ -7,9 +7,9 @@ mod tests {
     use rust_kata_002::dependency_graph;
     use rust_kata_002::dependency_graph::models::{Edge, Node, QueryResult};
     use rust_kata_002::errors::RustKataResult;
+    use rust_kata_002::interfaces::get_crate_dependencies::DependencyResponse;
+    use rust_kata_002::interfaces::{get_crate, get_crate_dependencies, CrateRegistry};
     use rust_kata_002::models::ErrorResponse;
-    use rust_kata_002::traits::get_crate_dependencies::DependencyResponse;
-    use rust_kata_002::traits::{get_crate, get_crate_dependencies, CrateRegistry};
 
     #[actix_rt::test]
     async fn test_dependency_graph_query_bad_request_name() {

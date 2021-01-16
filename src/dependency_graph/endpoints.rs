@@ -1,6 +1,6 @@
 use crate::dependency_graph::models::{Edge, Node, QueryParams, QueryResult};
+use crate::interfaces::CrateRegistry;
 use crate::models::ErrorResponse;
-use crate::traits::CrateRegistry;
 use actix_web::error::QueryPayloadError;
 use actix_web::web::QueryConfig;
 use actix_web::{error, web, HttpRequest, HttpResponse};
