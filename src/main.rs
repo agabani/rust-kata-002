@@ -28,7 +28,7 @@ async fn main() -> std::io::Result<()> {
             .data::<Box<dyn CrateRegistry>>(Box::new(CratesIoClient::new(&crate_registry).unwrap()))
             .configure(observability::endpoints::config)
             .service(web::scope("/dependency-graph").configure(dependency_graph::endpoints::config))
-            .service(web::scope("/proxy").configure(proxy::endpoints::config))
+            .configure(proxy::endpoints::config)
     })
     .bind(host_socket)?
     .run()
