@@ -1,22 +1,23 @@
 #[cfg(test)]
 mod tests {
-    use actix_web::{test, web, App};
+    use actix_web::{test, App};
     use async_trait::async_trait;
     use mockall::predicate::*;
     use mockall::*;
+
     use rust_kata_002::dependency_graph;
     use rust_kata_002::dependency_graph::models::{Edge, Node, QueryResult};
     use rust_kata_002::errors::RustKataResult;
-    use rust_kata_002::models::ErrorResponse;
-    use rust_kata_002::traits::get_crate_dependencies::DependencyResponse;
-    use rust_kata_002::traits::{get_crate, get_crate_dependencies, CrateRegistry};
+    use rust_kata_002::interfaces::crate_registry::get_crate_dependencies::DependencyResponse;
+    use rust_kata_002::interfaces::crate_registry::{
+        get_crate, get_crate_dependencies, CrateRegistry,
+    };
+    use rust_kata_002::interfaces::http::ErrorResponse;
 
     #[actix_rt::test]
     async fn test_dependency_graph_query_bad_request_name() {
-        let mut app = test::init_service(App::new().service(
-            web::scope("/dependency-graph").configure(dependency_graph::endpoints::config),
-        ))
-        .await;
+        let mut app =
+            test::init_service(App::new().configure(dependency_graph::endpoints::config)).await;
 
         let request = test::TestRequest::get()
             .uri("/dependency-graph?version=version")
@@ -34,10 +35,8 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_dependency_graph_query_bad_request_version() {
-        let mut app = test::init_service(App::new().service(
-            web::scope("/dependency-graph").configure(dependency_graph::endpoints::config),
-        ))
-        .await;
+        let mut app =
+            test::init_service(App::new().configure(dependency_graph::endpoints::config)).await;
 
         let request = test::TestRequest::get()
             .uri("/dependency-graph?name=name")
@@ -92,9 +91,7 @@ mod tests {
 
         let mut app = test::init_service(
             App::new()
-                .service(
-                    web::scope("/dependency-graph").configure(dependency_graph::endpoints::config),
-                )
+                .configure(dependency_graph::endpoints::config)
                 .data::<Box<dyn CrateRegistry>>(Box::new(mock)),
         )
         .await;

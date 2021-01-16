@@ -1,7 +1,6 @@
 use crate::errors::RustKataResult;
-use async_trait::async_trait;
 
-#[async_trait]
+#[async_trait::async_trait]
 pub trait CrateRegistry {
     async fn get_crate(&self, crate_name: &str) -> RustKataResult<get_crate::Response>;
     async fn get_crate_dependencies(
@@ -12,8 +11,9 @@ pub trait CrateRegistry {
 }
 
 pub mod get_crate {
-    use serde::{Deserialize, Serialize};
     use std::collections::HashMap;
+
+    use serde::{Deserialize, Serialize};
 
     #[derive(Debug, Deserialize, Serialize)]
     pub struct Response {

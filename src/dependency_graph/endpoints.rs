@@ -1,29 +1,14 @@
 use crate::dependency_graph::models::{Edge, Node, QueryParams, QueryResult};
-use crate::models::ErrorResponse;
-use crate::traits::CrateRegistry;
-use actix_web::error::QueryPayloadError;
-use actix_web::web::QueryConfig;
-use actix_web::{error, web, HttpRequest, HttpResponse};
+use crate::interfaces::crate_registry::CrateRegistry;
+use crate::interfaces::http;
+use actix_web::{web, HttpResponse};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.app_data(query_config()).route("", web::get().to(query));
-}
-
-fn query_config() -> QueryConfig {
-    web::QueryConfig::default().error_handler(|err: QueryPayloadError, _: &HttpRequest| {
-        let err_message = match &err {
-            QueryPayloadError::Deserialize(err) => err.to_string(),
-        };
-
-        error::InternalError::from_response(
-            err,
-            HttpResponse::BadRequest().json(ErrorResponse {
-                code: "query".to_owned(),
-                description: err_message,
-            }),
-        )
-        .into()
-    })
+    cfg.service(
+        web::scope("/dependency-graph")
+            .app_data(http::query_config())
+            .route("", web::get().to(query)),
+    );
 }
 
 async fn query(

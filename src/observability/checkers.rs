@@ -1,4 +1,4 @@
-use crate::health::models::Check;
+use crate::observability::models::Check;
 use chrono::{DateTime, SecondsFormat, Utc};
 use std::time::Instant;
 

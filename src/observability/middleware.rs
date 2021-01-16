@@ -1,12 +1,28 @@
 use crate::observability::metrics;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
-use actix_web::Error;
+use actix_web::middleware::Logger;
+use actix_web::{middleware, Error};
 use regex::RegexSet;
 use std::collections::HashSet;
 use std::future::{Future, Ready};
 use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::time::Instant;
+
+const METRICS_EXCLUDE: &str = "/metrics";
+const HEALTH_EXCLUDE_REGEX: &str = "^/health(?:/.*)?$";
+
+pub fn logger_middleware() -> Logger {
+    middleware::Logger::default()
+        .exclude(METRICS_EXCLUDE)
+        .exclude_regex(HEALTH_EXCLUDE_REGEX)
+}
+
+pub fn metric_middleware() -> ObservabilityMetrics {
+    ObservabilityMetrics::default()
+        .exclude(METRICS_EXCLUDE)
+        .exclude_regex(HEALTH_EXCLUDE_REGEX)
+}
 
 #[derive(Clone)]
 pub struct ObservabilityMetrics {
