@@ -12,7 +12,7 @@ mod tests {
     use rust_kata_002::interfaces::crate_registry::{
         get_crate, get_crate_dependencies, CrateRegistry,
     };
-    use rust_kata_002::models::ErrorResponse;
+    use rust_kata_002::interfaces::http::ErrorResponse;
 
     #[actix_rt::test]
     async fn test_dependency_graph_query_bad_request_name() {

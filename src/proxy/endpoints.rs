@@ -1,34 +1,16 @@
-use crate::interfaces::crate_registry::CrateRegistry;
-use crate::models::ErrorResponse;
-use actix_web::error::QueryPayloadError;
-use actix_web::web::QueryConfig;
-use actix_web::{error, web, HttpRequest, HttpResponse};
+use actix_web::{web, HttpResponse};
 use serde::{Deserialize, Serialize};
+
+use crate::interfaces::crate_registry::CrateRegistry;
+use crate::interfaces::http;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/proxy")
-            .app_data(query_config())
+            .app_data(http::query_config())
             .route("/crate", web::get().to(get_crate))
             .route("/crate_dependencies", web::get().to(get_crate_dependency)),
     );
-}
-
-fn query_config() -> QueryConfig {
-    web::QueryConfig::default().error_handler(|err: QueryPayloadError, _: &HttpRequest| {
-        let err_message = match &err {
-            QueryPayloadError::Deserialize(err) => err.to_string(),
-        };
-
-        error::InternalError::from_response(
-            err,
-            HttpResponse::BadRequest().json(ErrorResponse {
-                code: "query".to_owned(),
-                description: err_message,
-            }),
-        )
-        .into()
-    })
 }
 
 async fn get_crate(
