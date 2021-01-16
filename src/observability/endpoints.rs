@@ -7,14 +7,13 @@ use std::collections::HashMap;
 use std::time::Instant;
 
 pub fn config(cfg: &mut web::ServiceConfig) {
-    cfg.service(web::scope("/metrics").route("", web::get().to(get_metrics)));
-
     cfg.service(
         web::scope("/health")
-            .route("", web::get().to(get))
-            .route("/liveliness", web::get().to(probe))
-            .route("/readiness", web::get().to(probe)),
-    );
+            .route("", web::get().to(get_health))
+            .route("/liveliness", web::get().to(get_probe))
+            .route("/readiness", web::get().to(get_probe)),
+    )
+    .service(web::scope("/metrics").route("", web::get().to(get_metrics)));
 }
 
 async fn get_metrics() -> HttpResponse {
@@ -30,7 +29,7 @@ async fn get_metrics() -> HttpResponse {
         .body(buffer)
 }
 
-async fn get(application_start: web::Data<Instant>) -> HttpResponse {
+async fn get_health(application_start: web::Data<Instant>) -> HttpResponse {
     let now = Utc::now();
 
     let mut checks = HashMap::new();
@@ -44,7 +43,7 @@ async fn get(application_start: web::Data<Instant>) -> HttpResponse {
         .json(Health::envelope(checks))
 }
 
-async fn probe() -> HttpResponse {
+async fn get_probe() -> HttpResponse {
     HttpResponse::Ok().finish()
 }
 
@@ -54,8 +53,8 @@ mod tests {
     use actix_web::http;
 
     #[actix_rt::test]
-    async fn test_get_ok() {
-        let response = get(web::Data::new(Instant::now())).await;
+    async fn test_get_health_ok() {
+        let response = get_health(web::Data::new(Instant::now())).await;
 
         assert_eq!(response.status(), http::StatusCode::OK);
 
@@ -69,8 +68,8 @@ mod tests {
     }
 
     #[actix_rt::test]
-    async fn probe_ok() {
-        let response = probe().await;
+    async fn get_probe_ok() {
+        let response = get_probe().await;
 
         assert_eq!(response.status(), http::StatusCode::OK);
     }
