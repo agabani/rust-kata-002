@@ -19,21 +19,10 @@ async fn main() -> std::io::Result<()> {
     let host_port = env::var("HOST_PORT").unwrap_or_else(|_| "8080".to_owned());
     let host_socket = format!("{}:{}", host_address, host_port);
 
-    const METRICS_EXCLUDE: &str = "/metrics";
-    const HEALTH_EXCLUDE_REGEX: &str = "^/health(?:/.*)?$";
-
     HttpServer::new(move || {
         App::new()
-            .wrap(
-                observability::middleware::ObservabilityMetrics::default()
-                    .exclude(METRICS_EXCLUDE)
-                    .exclude_regex(HEALTH_EXCLUDE_REGEX),
-            )
-            .wrap(
-                middleware::Logger::default()
-                    .exclude(METRICS_EXCLUDE)
-                    .exclude_regex(HEALTH_EXCLUDE_REGEX),
-            )
+            .wrap(observability::middleware::metric_middleware())
+            .wrap(observability::middleware::logger_middleware())
             .wrap(middleware::NormalizePath::default())
             .data(application_start)
             .data::<Box<dyn CrateRegistry>>(Box::new(CratesIoClient::new(&crate_registry).unwrap()))
