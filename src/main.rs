@@ -1,4 +1,4 @@
-use actix_web::{middleware, web, App, HttpServer};
+use actix_web::{middleware, App, HttpServer};
 use rust_kata_002::crates_io::CratesIoClient;
 use rust_kata_002::interfaces::CrateRegistry;
 use rust_kata_002::{dependency_graph, observability, proxy};
@@ -27,7 +27,7 @@ async fn main() -> std::io::Result<()> {
             .data(application_start)
             .data::<Box<dyn CrateRegistry>>(Box::new(CratesIoClient::new(&crate_registry).unwrap()))
             .configure(observability::endpoints::config)
-            .service(web::scope("/dependency-graph").configure(dependency_graph::endpoints::config))
+            .configure(dependency_graph::endpoints::config)
             .configure(proxy::endpoints::config)
     })
     .bind(host_socket)?

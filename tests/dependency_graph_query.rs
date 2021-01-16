@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use actix_web::{test, web, App};
+    use actix_web::{test, App};
     use async_trait::async_trait;
     use mockall::predicate::*;
     use mockall::*;
@@ -13,10 +13,8 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_dependency_graph_query_bad_request_name() {
-        let mut app = test::init_service(App::new().service(
-            web::scope("/dependency-graph").configure(dependency_graph::endpoints::config),
-        ))
-        .await;
+        let mut app =
+            test::init_service(App::new().configure(dependency_graph::endpoints::config)).await;
 
         let request = test::TestRequest::get()
             .uri("/dependency-graph?version=version")
@@ -34,10 +32,8 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_dependency_graph_query_bad_request_version() {
-        let mut app = test::init_service(App::new().service(
-            web::scope("/dependency-graph").configure(dependency_graph::endpoints::config),
-        ))
-        .await;
+        let mut app =
+            test::init_service(App::new().configure(dependency_graph::endpoints::config)).await;
 
         let request = test::TestRequest::get()
             .uri("/dependency-graph?name=name")
@@ -92,9 +88,7 @@ mod tests {
 
         let mut app = test::init_service(
             App::new()
-                .service(
-                    web::scope("/dependency-graph").configure(dependency_graph::endpoints::config),
-                )
+                .configure(dependency_graph::endpoints::config)
                 .data::<Box<dyn CrateRegistry>>(Box::new(mock)),
         )
         .await;
