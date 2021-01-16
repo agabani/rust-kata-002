@@ -1,5 +1,5 @@
 use crate::errors::{RustKataError, RustKataResult};
-use crate::interfaces::CrateRegistry;
+use crate::interfaces::crate_registry::CrateRegistry;
 use crate::observability::metrics;
 use async_trait::async_trait;
 use reqwest::StatusCode;
@@ -62,7 +62,7 @@ impl CrateRegistry for CratesIoClient {
     async fn get_crate(
         &self,
         crate_name: &str,
-    ) -> RustKataResult<crate::interfaces::get_crate::Response> {
+    ) -> RustKataResult<crate::interfaces::crate_registry::get_crate::Response> {
         let path = format!("/api/v1/crates/{}", crate_name);
 
         self.get(&path, "get_crate").await
@@ -72,7 +72,7 @@ impl CrateRegistry for CratesIoClient {
         &self,
         crate_name: &str,
         crate_version: &str,
-    ) -> RustKataResult<crate::interfaces::get_crate_dependencies::Response> {
+    ) -> RustKataResult<crate::interfaces::crate_registry::get_crate_dependencies::Response> {
         let path = format!(
             "/api/v1/crates/{}/{}/dependencies",
             crate_name, crate_version
@@ -89,7 +89,7 @@ mod tests {
 
     mod get_crate {
         use super::*;
-        use crate::interfaces::get_crate;
+        use crate::interfaces::crate_registry::get_crate;
 
         #[actix_rt::test]
         async fn test() {
@@ -215,7 +215,7 @@ mod tests {
 
     mod get_crate_dependencies {
         use super::*;
-        use crate::interfaces::get_crate_dependencies;
+        use crate::interfaces::crate_registry::get_crate_dependencies;
 
         #[actix_rt::test]
         async fn test() {

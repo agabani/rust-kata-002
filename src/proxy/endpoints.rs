@@ -1,4 +1,4 @@
-use crate::interfaces::CrateRegistry;
+use crate::interfaces::crate_registry::CrateRegistry;
 use crate::models::ErrorResponse;
 use actix_web::error::QueryPayloadError;
 use actix_web::web::QueryConfig;

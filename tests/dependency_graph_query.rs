@@ -4,11 +4,14 @@ mod tests {
     use async_trait::async_trait;
     use mockall::predicate::*;
     use mockall::*;
+
     use rust_kata_002::dependency_graph;
     use rust_kata_002::dependency_graph::models::{Edge, Node, QueryResult};
     use rust_kata_002::errors::RustKataResult;
-    use rust_kata_002::interfaces::get_crate_dependencies::DependencyResponse;
-    use rust_kata_002::interfaces::{get_crate, get_crate_dependencies, CrateRegistry};
+    use rust_kata_002::interfaces::crate_registry::get_crate_dependencies::DependencyResponse;
+    use rust_kata_002::interfaces::crate_registry::{
+        get_crate, get_crate_dependencies, CrateRegistry,
+    };
     use rust_kata_002::models::ErrorResponse;
 
     #[actix_rt::test]
