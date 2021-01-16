@@ -1,7 +1,7 @@
 use crate::dependency_graph::models::{Edge, Node, QueryParams, QueryResult};
 use crate::interfaces::crate_registry::CrateRegistry;
-use actix_web::{web, HttpResponse};
 use crate::interfaces::http;
+use actix_web::{web, HttpResponse};
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
