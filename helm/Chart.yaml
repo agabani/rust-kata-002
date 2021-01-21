@@ -1,0 +1,3 @@
+apiVersion: v2
+name: rust-kata-002
+version: 0.0.1
