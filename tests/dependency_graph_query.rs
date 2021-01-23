@@ -16,8 +16,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_dependency_graph_query_bad_request_name() {
-        let mut app =
-            test::init_service(App::new().configure(dependency_graph::endpoints::config)).await;
+        let mut app = test::init_service(
+            App::new().configure(|config| dependency_graph::endpoints::config(config, "")),
+        )
+        .await;
 
         let request = test::TestRequest::get()
             .uri("/dependency-graph?version=version")
@@ -35,8 +37,10 @@ mod tests {
 
     #[actix_rt::test]
     async fn test_dependency_graph_query_bad_request_version() {
-        let mut app =
-            test::init_service(App::new().configure(dependency_graph::endpoints::config)).await;
+        let mut app = test::init_service(
+            App::new().configure(|config| dependency_graph::endpoints::config(config, "")),
+        )
+        .await;
 
         let request = test::TestRequest::get()
             .uri("/dependency-graph?name=name")
@@ -91,7 +95,7 @@ mod tests {
 
         let mut app = test::init_service(
             App::new()
-                .configure(dependency_graph::endpoints::config)
+                .configure(|config| dependency_graph::endpoints::config(config, ""))
                 .data::<Box<dyn CrateRegistry>>(Box::new(mock)),
         )
         .await;
