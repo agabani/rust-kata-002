@@ -3,9 +3,11 @@ use crate::interfaces::crate_registry::CrateRegistry;
 use crate::interfaces::http;
 use actix_web::{web, HttpResponse};
 
-pub fn config(cfg: &mut web::ServiceConfig) {
+pub fn config(cfg: &mut web::ServiceConfig, host_base_path: &str) {
+    let path = format!("{}/dependency-graph", host_base_path);
+
     cfg.service(
-        web::scope("/dependency-graph")
+        web::scope(&path)
             .app_data(http::query_config())
             .route("", web::get().to(query)),
     );

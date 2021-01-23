@@ -19,6 +19,8 @@ async fn main() -> std::io::Result<()> {
     let host_port = env::var("HOST_PORT").unwrap_or_else(|_| "8080".to_owned());
     let host_socket = format!("{}:{}", host_address, host_port);
 
+    let host_base_path = env::var("HOST_BASE_PATH").unwrap_or_else(|_| "".to_owned());
+
     HttpServer::new(move || {
         App::new()
             .wrap(observability::middleware::metric_middleware())
@@ -27,8 +29,8 @@ async fn main() -> std::io::Result<()> {
             .data(application_start)
             .data::<Box<dyn CrateRegistry>>(Box::new(CratesIoClient::new(&crate_registry).unwrap()))
             .configure(observability::endpoints::config)
-            .configure(dependency_graph::endpoints::config)
-            .configure(proxy::endpoints::config)
+            .configure(|config| dependency_graph::endpoints::config(config, &host_base_path))
+            .configure(|config| proxy::endpoints::config(config, &host_base_path))
     })
     .bind(host_socket)?
     .run()

@@ -4,9 +4,11 @@ use serde::{Deserialize, Serialize};
 use crate::interfaces::crate_registry::CrateRegistry;
 use crate::interfaces::http;
 
-pub fn config(cfg: &mut web::ServiceConfig) {
+pub fn config(cfg: &mut web::ServiceConfig, host_base_path: &str) {
+    let path = format!("{}/proxy", host_base_path);
+
     cfg.service(
-        web::scope("/proxy")
+        web::scope(&path)
             .app_data(http::query_config())
             .route("/crate", web::get().to(get_crate))
             .route("/crate_dependencies", web::get().to(get_crate_dependency)),
