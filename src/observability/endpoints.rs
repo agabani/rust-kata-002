@@ -10,7 +10,7 @@ pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/health")
             .route("", web::get().to(get_health))
-            .route("/liveliness", web::get().to(get_probe))
+            .route("/liveness", web::get().to(get_probe))
             .route("/readiness", web::get().to(get_probe)),
     )
     .service(web::scope("/metrics").route("", web::get().to(get_metrics)));

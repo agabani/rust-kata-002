@@ -4,12 +4,12 @@ mod tests {
     use rust_kata_002::observability;
 
     #[actix_rt::test]
-    async fn test_health_liveliness_get() {
+    async fn test_health_liveness_get() {
         let mut app =
             test::init_service(App::new().configure(observability::endpoints::config)).await;
 
         let request = test::TestRequest::get()
-            .uri("/health/liveliness")
+            .uri("/health/liveness")
             .to_request();
 
         let response = test::call_service(&mut app, request).await;
