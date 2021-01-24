@@ -1,12 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "helm-rust-kata-002.fullname" . }}
+  name: {{ include "rust-kata-002.fullname" . }}
   labels:
-    app: {{ template "helm-rust-kata-002.name" . }}
-    chart: {{ template "helm-rust-kata-002.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    {{- include "rust-kata-002.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -15,5 +12,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app: {{ template "helm-rust-kata-002.name" . }}
-    release: {{ .Release.Name }}
+    {{- include "rust-kata-002.selectorLabels" . | nindent 4 }}
